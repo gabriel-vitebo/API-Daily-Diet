@@ -3,10 +3,10 @@ import { knex } from './database'
 
 const app = fastify()
 
-app.get('/test', async () => {
-  const test = await knex('user').select('*')
+app.get('/meal', async () => {
+  const createUser = await knex('mealMade').select('*')
 
-  return test
+  return createUser
 })
 
 app
