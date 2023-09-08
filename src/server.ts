@@ -1,13 +1,21 @@
 import fastify from 'fastify'
 import { knex } from './database'
 import { env } from './env'
+import { randomUUID } from 'crypto'
 
 const app = fastify()
 
 app.get('/meal', async () => {
-  const createUser = await knex('mealMade').select('*')
-
-  return createUser
+  await knex('mealMade')
+    .insert({
+      id: randomUUID(),
+      name: 'test',
+      description: 'teste tambem',
+      date: 10,
+      hour: 30,
+      onDiet: false,
+    })
+    .returning('*')
 })
 
 app
