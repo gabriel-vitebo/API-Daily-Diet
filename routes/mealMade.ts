@@ -38,4 +38,22 @@ export async function mealMadeRoutes(app: FastifyInstance) {
 
     return reply.status(201).send()
   })
+
+  app.get('/', async () => {
+    const mealMade = await knex('mealMade').select()
+
+    return { mealMade }
+  })
+
+  app.get('/:id', async (request) => {
+    const getMealMadeParamsSchema = z.object({
+      id: z.string().uuid(),
+    })
+
+    const { id } = getMealMadeParamsSchema.parse(request.params)
+
+    const mealMade = await knex('mealMade').where('id', id).first()
+
+    return { mealMade }
+  })
 }
