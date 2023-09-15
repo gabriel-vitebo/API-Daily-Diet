@@ -1,10 +1,12 @@
 import fastify from 'fastify'
 import { env } from './env'
-import { mealMadeRoutes } from '../routes/transaction'
+import { mealMadeRoutes } from '../routes/mealMade'
 
 const app = fastify()
 
-app.register(mealMadeRoutes)
+app.register(mealMadeRoutes, {
+  prefix: 'meal',
+})
 
 app
   .listen({
