@@ -18,15 +18,21 @@ export async function user(app: FastifyInstance) {
 
     // verificar se o email é valido com a regex
 
-    await knex('user').insert({
-      id: randomUUID(),
-      name,
-      email,
-      password: hashedPassword,
-    })
+    const emailRegex = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+(\.[a-z]+)?$/i
+
+    if (emailRegex.test(email)) {
+      await knex('user').insert({
+        id: randomUUID(),
+        name,
+        email,
+        password: hashedPassword,
+      })
+    } else {
+      return reply.status(401).send({
+        error: 'Algo deu errado, verifique se o email é valido',
+      })
+    }
 
     return reply.status(201).send()
-
-    // criar uma rota para autentificar o usuario com token
   })
 }
