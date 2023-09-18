@@ -88,4 +88,74 @@ export async function mealMadeRoutes(app: FastifyInstance) {
       return reply.status(201).send({ uniqueMealMade })
     },
   )
+
+  app.put(
+    '/:id',
+    {
+      preHandler: [ensureAuthenticate],
+    },
+    async (request, reply) => {
+      const updateMealMadeParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const updateMealMadeBodySchema = z.object({
+        name: z.string(),
+        description: z.string(),
+        date: z.string(),
+        hour: z.string(),
+        onDiet: z.boolean(),
+      })
+
+      const { id } = updateMealMadeParamsSchema.parse(request.params)
+      const { name, description, date, hour, onDiet } =
+        updateMealMadeBodySchema.parse(request.body)
+
+      const userId = request.user?.id
+
+      const verifyMeal = await knex('mealMade').where('id', id).first()
+
+      if (verifyMeal?.user_id !== userId) {
+        return reply.status(401).send({
+          error: 'you do not have permission to update this meal',
+        })
+      }
+
+      await knex('mealMade').where({ id }).update({
+        name,
+        description,
+        date,
+        hour,
+        onDiet,
+      })
+
+      return reply.status(201).send()
+    },
+  )
+
+  app.delete(
+    '/:id',
+    {
+      preHandler: [ensureAuthenticate],
+    },
+    async (request, reply) => {
+      const deleteIdParamsSchema = z.object({
+        id: z.string(),
+      })
+
+      const { id } = deleteIdParamsSchema.parse(request.params)
+      const userId = request.user?.id
+
+      const verifyMeal = await knex('mealMade').where('id', id).first()
+
+      if (verifyMeal?.user_id !== userId) {
+        return reply.status(401).send({
+          error: 'you do not have permission to update this meal',
+        })
+      }
+      await knex('mealMade').where({ id }).delete()
+
+      return reply.status(201).send()
+    },
+  )
 }
