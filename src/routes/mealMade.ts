@@ -49,21 +49,43 @@ export async function mealMadeRoutes(app: FastifyInstance) {
     },
   )
 
-  app.get('/', async () => {
-    const mealMade = await knex('mealMade').select()
+  app.get(
+    '/',
+    {
+      preHandler: [ensureAuthenticate],
+    },
+    async (request, reply) => {
+      const userId = request.user?.id
 
-    return { mealMade }
-  })
+      const mealMade = await knex('mealMade').select().where('user_id', userId)
 
-  app.get('/:id', async (request) => {
-    const getMealMadeParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
+      return reply.status(201).send({ mealMade })
+    },
+  )
 
-    const { id } = getMealMadeParamsSchema.parse(request.params)
+  app.get(
+    '/:id',
+    {
+      preHandler: [ensureAuthenticate],
+    },
+    async (request, reply) => {
+      const getMealMadeParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-    const mealMade = await knex('mealMade').where('id', id).first()
+      const userId = request.user?.id
 
-    return { mealMade }
-  })
+      const { id } = getMealMadeParamsSchema.parse(request.params)
+
+      const uniqueMealMade = await knex('mealMade').where('id', id).first()
+
+      if (uniqueMealMade?.user_id !== userId) {
+        return reply.status(401).send({
+          error: 'You are not authorized to view the item',
+        })
+      }
+
+      return reply.status(201).send({ uniqueMealMade })
+    },
+  )
 }

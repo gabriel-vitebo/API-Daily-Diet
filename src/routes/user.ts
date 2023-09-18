@@ -16,8 +16,6 @@ export async function user(app: FastifyInstance) {
 
     const hashedPassword = await hash(password, 8)
 
-    // verificar se o email é valido com a regex
-
     const emailRegex = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+(\.[a-z]+)?$/i
 
     if (emailRegex.test(email)) {
